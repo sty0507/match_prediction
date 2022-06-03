@@ -1,6 +1,10 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+var db_config = require(__dirname + "/config/database.js");
+var conn = db_config.init();
+
+db_config.connect(conn);
 
 app.set("views", "./webtest/views");
 app.set("view engine", "ejs");
@@ -9,14 +13,8 @@ app.use(express.urlencoded({ extended: false }));
 
 module.exports = app;
 
-// =====================DB 역활=====================
-let primary_id = ""; 
-let primary_pw = "";
-let primary_name = "";
-// =================================================
-
 app.get("/home", (req, res) => {
-  res.render("home.html", { name: primary_name });
+  res.render("home.html");
 });
 
 app.get("/register", (req, res) => {
@@ -28,14 +26,16 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  primary_id = req.body.id;
-  primary_pw = req.body.pw;
-  let repw = req.body.rpw;
-  primary_name = req.body.name;
-  if (primary_pw === repw) { // 비밀번호 확인이 제대로 되었는지
-    console.log(primary_id);
-    console.log(primary_pw);
-    console.log(primary_name);
+  var params = [req.body.id, req.body.pw, req.body.name];
+  var sql = "INSERT INTO PERSON VALUES(?, ?, ?)";
+
+  if (req.body.pw === req.body.rpw) {
+    // 비밀번호 확인이 제대로 되었는지
+
+    conn.query(sql, params, function (err) {
+      if (err) console.log("query is not excuted.\n" + err);
+      else res.redirect("/register");
+    });
     res.redirect("/login");
   } else {
     res.send(
@@ -51,14 +51,21 @@ app.post("/login", (req, res) => {
   console.log(c_id);
   console.log(c_pw);
 
-  if (c_id === primary_id && c_pw === primary_pw) {
-    res.redirect("/home");
-  } else {
-    res.send(
-      "<script>alert('회원정보가 일치하지 않습니다.'); window.location.replace('/login');</script>"
-    );
-    // res.redirect("/login");
-  }
+  var sql = "SELECT * FROM PERSON";
+  console.log(sql);
+  conn.query(sql, function (err, rows, fields) {
+    if (err) console.log("query is not excuted\n" + err);
+    else res.redirect("/login");
+  });
+
+  // if (c_id === primary_id && c_pw === primary_pw) {
+  //   res.redirect("/home");
+  // } else {
+  //   res.send(
+  //     "<script>alert('회원정보가 일치하지 않습니다.'); window.location.replace('/login');</script>"
+  //   );
+  //   // res.redirect("/login");
+  // }
 });
 
 app.listen(3000, () => {
