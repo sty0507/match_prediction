@@ -33,4 +33,10 @@
 1) DB 연동
 2) 피그마 
 
+### 22/06/04
+1) DB 연동 성공
+- 해야 할것
+1) 로그인에서 예외처리
+2) 피그마
+
 자세한 velog : https://velog.io/@sty0507/series/%EA%B0%9C%EB%B0%9C%EC%9D%BC%EC%A7%80
