@@ -3,11 +3,10 @@
 import http.client
 import json
 import pandas as pd
-import cx_Oracle
+import pymysql
 
-
-db=cx_Oracle.connect('c##oracle_test','1234', 'localhost/xe')
-cursor = db.cursor()
+conn = pymysql.connect(host='localhost', user = 'root', password ='root', db='match_prediction')
+cursor = conn.cursor()
 connection = http.client.HTTPConnection('api.football-data.org')
 headers = { 'X-Auth-Token' : 'a5138360d35743f1961282ccb58f088f' }
 connection.request('GET', '/v2/matches', None, headers )
@@ -37,9 +36,9 @@ live_score_awayTeam = list(lsh['awayTeam'] for lsh in live_score)
 # =================================================================
 
 for hn, an, cn, ms, lsh, lsa in zip(homeTeam_name, awayTeam_name, competition_name, match_status, live_score_homeTeam,live_score_awayTeam):
-    cursor.execute(f"INSERT INTO MATCH (HomeTeam,AwayTeam,Competition,match_status,Live_Score_HomeTeam,Live_Score_AwayTeam) VALUES (\'{hn}\',\'{an}\',\'{cn}\',\'{ms}\',\'{lsh}\',\'{lsa}\')")
+    cursor.execute(f"INSERT INTO schedule (HomeTeam,AwayTeam,Competition,match_status,Live_Score_HomeTeam,Live_Score_AwayTeam) VALUES (\'{hn}\',\'{an}\',\'{cn}\',\'{ms}\',\'{lsh}\',\'{lsa}\')")
     print("good")
 
-db.commit()
-db.close()
+conn.commit()
+conn.close()
 
