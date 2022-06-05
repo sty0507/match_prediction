@@ -47,6 +47,7 @@ app.post("/registerAF", (req, res) => {
 app.post("/loginAF", (req, res) => {
   let c_id = req.body.id;
   let c_pw = req.body.pw;
+  let result_pw = "";
 
   //확인 해야 할것
   // 1) 입력을 했는가
@@ -63,21 +64,21 @@ app.post("/loginAF", (req, res) => {
 
     var sql_id = "SELECT pw FROM PERSON WHERE ID = " + '"' + c_id + '"'; // 아이디가 존재하는지 확인 후 그에 맞는 password 가져옴
     var sql_pw = "SELECT name FROM PERSON WHERE ID = " + '"' + c_id + '"';
+
     conn.query(sql_id, function (err, results) {
       var result = results[0];
-
-      console.log(results);
-      console.log(result);
-
+      console.log(result_pw);
       if (!results) {
         // 2) result가 sql을 실행해서 가져옴. 만약 results가 비어있으면 일치하지가 않음(반환 형태가 [] 임.)
-        res.send(
+        return res.send(
           "<script>alert('ID가 존재하지 않습니다.'); window.location.replace('/login');</script>"
         );
-      }
-      else if (result.pw === c_pw) {
+      } else if (result_pw == c_pw) {
+        // result.pw에서 에러(빈 것이 오면 result에는 pw가 없음 -> 없는데 어캐 찾으라는 에러)
         // 비밀번호 확인 3)
-        res.redirect("/home");
+        res.send(
+          "<script>alert('성공적으로 로그인이 되었습니다.'); window.location.replace('/home');</script>"
+        );
       } else {
         res.send(
           "<script>alert('회원정보가 존재하지 않습니다.'); window.location.replace('/login');</script>"
@@ -85,15 +86,6 @@ app.post("/loginAF", (req, res) => {
       }
     });
   }
-
-  // if (c_id === primary_id && c_pw === primary_pw) {
-  //   res.redirect("/home");
-  // } else {
-  //   res.send(
-  //     "<script>alert('회원정보가 일치하지 않습니다.'); window.location.replace('/login');</script>"
-  //   );
-  //   // res.redirect("/login");
-  // }
 });
 
 app.listen(3000, () => {
