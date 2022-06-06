@@ -17,6 +17,10 @@ app.get("/home", (req, res) => {
   res.render("home.html");
 });
 
+app.get("/match", (req, res) => {
+  res.render("match_prediction.html");
+});
+
 app.get("/register", (req, res) => {
   res.render("register.html");
 });
@@ -44,6 +48,18 @@ app.post("/registerAF", (req, res) => {
   }
 });
 
+app.post("/matchAF", (req, res) => {
+  var home = req.body.wh;
+  var draw = req.body.d;
+  var away = req.body.wa;
+
+  if (home) console.log("Will win home team");
+  else if (draw) console.log("Will draw");
+  else console.log("Will win away team");
+
+  res.redirect("/match");
+});
+
 app.post("/loginAF", (req, res) => {
   let c_id = req.body.id;
   let c_pw = req.body.pw;
@@ -69,7 +85,7 @@ app.post("/loginAF", (req, res) => {
       var result = results[0];
       console.log(result_pw);
       if (!results) {
-        // 2) result가 sql을 실행해서 가져옴. 만약 results가 비어있으면 일치하지가 않음(반환 형태가 [] 임.)
+        // 2)
         return res.send(
           "<script>alert('ID가 존재하지 않습니다.'); window.location.replace('/login');</script>"
         );
