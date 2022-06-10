@@ -38,7 +38,7 @@ app.get("/login", (req, res) => {
 //   res.redirect("/home");
 // });
 
-app.post("/registerAF", (req, res) => {
+app.post("/registerAF", (req, res) => {// 회원가입 post
   i++;
   var params = [req.body.id, req.body.pw, req.body.name, i];
   var sql = "INSERT INTO PERSON VALUES(?, ?, ?, ?)";
@@ -62,32 +62,16 @@ app.post("/registerAF", (req, res) => {
   }
 });
 
-function isEmpty(param) {
-  if (param.constructor === Object) {
-    return false;
-  } else return true;
-}
-
-app.post("/matchAF", (req, res) => {
-  var home = req.body.wh;
-  var draw = req.body.d;
-  var away = req.body.wa;
-
-  if (home) console.log("Will win home team");
-  else if (draw) console.log("Will draw");
-  else console.log("Will win away team");
-
-  res.redirect("/match");
-});
-
-app.post("/loginAF", (req, res) => {
-  let c_id = req.body.id;
-  let c_pw = req.body.pw;
 
   //확인 해야 할것
   // 1) 입력을 했는가
   // 2) 아이디가 DB 상에 존재를 하는가
   // 3) 입력한 아이디가 DB 상의 비밀번호와 일치하는가
+
+
+app.post("/loginAF", (req, res) => {// 로그인 post
+  let c_id = req.body.id;
+  let c_pw = req.body.pw;
 
   if (c_pw == "" || c_id == "") {
     res.send(
@@ -100,33 +84,43 @@ app.post("/loginAF", (req, res) => {
     var sql_id = "SELECT id FROM PERSON";
     var sql_pw = "SELECT pw FROM PERSON WHERE ID = " + '"' + c_id + '"'; // 아이디가 존재하는지 확인 후 그에 맞는 password 가져옴
     var sql_name = "SELECT name FROM PERSON WHERE ID = " + '"' + c_id + '"';
-    var result_pw = { pw: "" };
+    var result;
     conn.query(sql_pw, function (err, results) {
-      var result = results[0];
       console.log(results);
-      result_pw = result;
+      result = results[0];
+      console.log(this.result.length)
 
-      if (results.length > 0) {
+      if (true) {
         // 2)
         console.log("True");
         return res.send(
           "<script>alert('회원정보가 존재하지 않습니다.'); window.location.replace('/login');</script>"
         );
-      } else if (result_pw != c_pw) {
+      } else if (result_pw != c_pw) {// 비밀번호 확인 3)
         console.log("False");
         return res.send(
           "<script>alert('비밀번호가 일치하지 않습니다.'); window.location.replace('/login');</script>"
         );
       } else {
         console.log("Draw");
-        // result.pw에서 에러(빈 것이 오면 result에는 pw가 없음 -> 없는데 어캐 찾으라는 에러)
-        // 비밀번호 확인 3)
         return res.send(
           "<script>alert('성공적으로 로그인이 되었습니다.'); window.location.replace('/home');</script>"
         );
       }
     });
   }
+});
+
+app.post("/matchAF", (req, res) => {// 매치 post
+  var home = req.body.wh;
+  var draw = req.body.d;
+  var away = req.body.wa;
+
+  if (home) console.log("Will win home team");
+  else if (draw) console.log("Will draw");
+  else console.log("Will win away team");
+
+  res.redirect("/match");
 });
 
 app.listen(3000, () => {
