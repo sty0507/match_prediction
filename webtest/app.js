@@ -32,11 +32,6 @@ app.get("/login", (req, res) => {
   res.render("index.html");
 });
 
-// 쿠키 생성
-// app.get("/cookie", (req, res) => {
-//   res.cookie("cookieName", "cookieValue");
-//   res.redirect("/home");
-// });
 
 app.post("/registerAF", (req, res) => {// 회원가입 post
   i++;
@@ -78,35 +73,33 @@ app.post("/loginAF", (req, res) => {// 로그인 post
       "<script>alert('입력해주세요.'); window.location.replace('/login');</script>"
     ); // 1)
   } else {
-    console.log(c_id);
-    console.log(c_pw);
-
     var sql_id = "SELECT id FROM PERSON";
-    var sql_pw = "SELECT pw FROM PERSON WHERE ID = " + '"' + c_id + '"'; // 아이디가 존재하는지 확인 후 그에 맞는 password 가져옴
-    var sql_name = "SELECT name FROM PERSON WHERE ID = " + '"' + c_id + '"';
     var result;
-    conn.query(sql_pw, function (err, results) {
-      console.log(results);
-      result = results[0];
-      console.log(this.result.length)
+    var result_pw = {pw : ""}
 
-      if (true) {
-        // 2)
-        console.log("True");
+    conn.query(sql_pw, function (err, results) {
+      result = results[0];
+
+      if(result != undefined){ // 2)
+        result_pw = result.pw
+
+        if(result_pw == c_pw){// 비밀번호 확인 3)
+          return res.send(
+            "<script>alert('성공적으로 로그인이 되었습니다.'); window.location.replace('/home');</script>"
+          );
+        }
+        else{
+          return res.send(
+            "<script>alert('비밀번호가 일치하지 않습니다.'); window.location.replace('/login');</script>"
+          );
+        }
+      }
+      else{
         return res.send(
           "<script>alert('회원정보가 존재하지 않습니다.'); window.location.replace('/login');</script>"
         );
-      } else if (result_pw != c_pw) {// 비밀번호 확인 3)
-        console.log("False");
-        return res.send(
-          "<script>alert('비밀번호가 일치하지 않습니다.'); window.location.replace('/login');</script>"
-        );
-      } else {
-        console.log("Draw");
-        return res.send(
-          "<script>alert('성공적으로 로그인이 되었습니다.'); window.location.replace('/home');</script>"
-        );
       }
+
     });
   }
 });
@@ -129,3 +122,5 @@ app.listen(3000, () => {
 
 // person 생성 코드
 // create table person(id varchar(30) primary key, pw varchar(30), name varchar(30), num int);
+// var sql_pw = "SELECT pw FROM PERSON WHERE ID = " + '"' + c_id + '"'; // 아이디가 존재하는지 확인 후 그에 맞는 password 가져옴
+// var sql_name = "SELECT name FROM PERSON WHERE ID = " + '"' + c_id + '"';
