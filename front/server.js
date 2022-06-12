@@ -1,77 +1,31 @@
-// const express = require('express')
-// const app = express()
+// ======================== password 암호화 ========================================
+const express = require("express");
+const app = express();
+const bcrypt = require("bcrypt");
 
-// const server = app.listen(3000, () => {
-//     console.log('server start, port 3000')
-// })
+const saltRounds = 10; // 몇번 해싱을 할 것인지
+const beforePassword = "12345"; // before
+var afterPassword = ""; // after
 
-// const oracledb = require('oracledb')
-// oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT
-
-// app.get('/select', function(request, response) {
-//     getSelect(request, response)
-// })
-
-// async function getSelect(request, response) {
-//     let connection
-//     try {
-//         connection = await oracledb.getConnection({
-//             user          : "c##oracle_test",
-//             password      : "1234",
-//             connectString : "xe"
-//         })
-
-//         const result = await connection.execute(
-//             `SELECT * FROM PERSON`
-//         )
-
-//         console.log(result)
-//         response.send(result.rows)
-//     } catch (error) {
-//         console.log(error)
-//     } finally {
-//         if (connection) {
-//             try {
-//                 await connection.close()
-//             } catch (error) {
-//                 console.log(error)
-//             }
-//         }
-//     }
-// }
-
-var oracledb = require('oracledb');
-var config = {
-    user: "c##oracle_test",
-    password: "1234",
-    connectString: "localhost/xe"
-}
-
-oracledb.getConnection(config, (err, conn) =>{
-    todoWork(err, conn);
+app.get("/", function (req, res) {
+  bcrypt.hash(beforePassword, saltRounds, function (err, hash) {
+    try {
+      afterPassword = hash;
+      console.log(afterPassword);
+    } catch (err) {
+      console.log(err); // 예외처리
+    }
+  });
+  bcrypt.compare(beforePassword, afterPassword, function (err, result) {
+    try {
+      if (result) console.log("True");
+      else console.log("False");
+    } catch (err) {
+      console.log(err);
+    }
+  });
 });
 
-function todoWork(err, connection) {
-    if (err) {
-        console.error(err.message);
-        return;
-    }
-    connection.execute("select * from person", [], function (err, result) {
-        if (err) {
-            console.error(err.message);
-            doRelease(connection);
-            return;
-        }
-        console.log(result.metaData);  //테이블 스키마
-        console.log(result.rows);  //데이터
-        doRelease(connection);
-    });
-}    
-
-function doRelease(connection) {
-    connection.release(function (err) {
-        if (err) {
-            console.error(err.message);
-        }
-    });
-}
+app.listen(8080, () => {
+  console.log("서버 띄우기");
+});

@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
 var db_config = require(__dirname + "/config/database.js");
 var conn = db_config.init();
-const cookieParser = require("cookie-parser");
 let i = 0;
 
 db_config.connect(conn);
@@ -12,7 +12,6 @@ app.set("views", "./webtest/views");
 app.set("view engine", "ejs");
 app.engine("html", require("ejs").renderFile);
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 
 module.exports = app;
 
@@ -32,17 +31,39 @@ app.get("/login", (req, res) => {
   res.render("index.html");
 });
 
+async function hashPassword(password) {
+  bcrypt.hash(this.password, 10, function (err, hash) {
+    try {
+      var hpassword = hash;
+      console.log(hpassword);
+      return hpassword;
+    } catch (err) {
+      console.log(err);
+    }
+  });
+}
 
-app.post("/registerAF", (req, res) => {// 회원가입 post
+function checkUser(password, hpassword) {
+  bcrypt.compare(password, hpassword, function (err, result) {
+    if (result) {
+      return result;
+    } else {
+      console.log(err);
+    }
+  });
+}
+
+app.post("/registerAF", (req, res) => {
+  // 회원가입 post
   i++;
-  var params = [req.body.id, req.body.pw, req.body.name, i];
   var sql = "INSERT INTO PERSON VALUES(?, ?, ?, ?)";
-  var ch_id = "SELECT id FROM PEROSN";
-  console.log(i);
+  var hashedpassword = '"' + hashPassword(req.body.pw) + '"';
+  var params = [req.body.id, hashedpassword, req.body.name, i];
   if (req.body.pw === req.body.rpw) {
     // 비밀번호 확인이 제대로 되었는지
     conn.query(sql, params, function (err) {
       if (err) {
+        // 제대로 DB로 갔는지 확인
         console.log("query is not excuted.\n" + err);
         return res.redirect("/register");
       } else {
@@ -57,54 +78,48 @@ app.post("/registerAF", (req, res) => {// 회원가입 post
   }
 });
 
-
-  //확인 해야 할것
-  // 1) 입력을 했는가
-  // 2) 아이디가 DB 상에 존재를 하는가
-  // 3) 입력한 아이디가 DB 상의 비밀번호와 일치하는가
-
-
-app.post("/loginAF", (req, res) => {// 로그인 post
+app.post("/loginAF", (req, res) => {
+  // 로그인 post
   let c_id = req.body.id;
   let c_pw = req.body.pw;
 
   if (c_pw == "" || c_id == "") {
     res.send(
       "<script>alert('입력해주세요.'); window.location.replace('/login');</script>"
-    ); // 1)
+    ); // 1)입력을 했는가
   } else {
     var sql_id = "SELECT id FROM PERSON";
     var result;
-    var result_pw = {pw : ""}
+    var result_pw = { pw: "" };
 
     conn.query(sql_pw, function (err, results) {
       result = results[0];
 
-      if(result != undefined){ // 2)
-        result_pw = result.pw
+      if (result != undefined) {
+        // 2)아이디가 DB 상에 존재를 하는가
+        result_pw = result.pw;
 
-        if(result_pw == c_pw){// 비밀번호 확인 3)
+        if (checkUser(c_pw, result_pw)) {
+          // 비밀번호 확인 3)입력한 아이디가 DB 상의 비밀번호와 일치하는가
           return res.send(
             "<script>alert('성공적으로 로그인이 되었습니다.'); window.location.replace('/home');</script>"
           );
-        }
-        else{
+        } else {
           return res.send(
             "<script>alert('비밀번호가 일치하지 않습니다.'); window.location.replace('/login');</script>"
           );
         }
-      }
-      else{
+      } else {
         return res.send(
           "<script>alert('회원정보가 존재하지 않습니다.'); window.location.replace('/login');</script>"
         );
       }
-
     });
   }
 });
 
-app.post("/matchAF", (req, res) => {// 매치 post
+app.post("/matchAF", (req, res) => {
+  // 매치 post
   var home = req.body.wh;
   var draw = req.body.d;
   var away = req.body.wa;
@@ -121,6 +136,6 @@ app.listen(3000, () => {
 });
 
 // person 생성 코드
-// create table person(id varchar(30) primary key, pw varchar(30), name varchar(30), num int);
+// create table person(id varchar(30) primary key, pw varchar(50), name varchar(30), num int);
 // var sql_pw = "SELECT pw FROM PERSON WHERE ID = " + '"' + c_id + '"'; // 아이디가 존재하는지 확인 후 그에 맞는 password 가져옴
 // var sql_name = "SELECT name FROM PERSON WHERE ID = " + '"' + c_id + '"';
