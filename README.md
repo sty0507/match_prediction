@@ -56,4 +56,6 @@
 - 해야 할것
 1) 동기와 비동기 공부하기
 2) 암호화 구현 완료하기
+- https://opentutorials.org/course/3332/21132
+<br>
 자세한 velog : https://velog.io/@sty0507/series/%EA%B0%9C%EB%B0%9C%EC%9D%BC%EC%A7%80
