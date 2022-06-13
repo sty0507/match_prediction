@@ -5,6 +5,8 @@ const bcrypt = require("bcrypt");
 var db_config = require(__dirname + "/config/database.js");
 var conn = db_config.init();
 let i = 0;
+let hpass = "";
+const saltRounds = 10;
 
 db_config.connect(conn);
 
@@ -31,36 +33,17 @@ app.get("/login", (req, res) => {
   res.render("index.html");
 });
 
-async function hashPassword(password) {
-  bcrypt.hash(this.password, 10, function (err, hash) {
-    try {
-      var hpassword = hash;
-      console.log(hpassword);
-      return hpassword;
-    } catch (err) {
-      console.log(err);
-    }
-  });
-}
-
-function checkUser(password, hpassword) {
-  bcrypt.compare(password, hpassword, function (err, result) {
-    if (result) {
-      return result;
-    } else {
-      console.log(err);
-    }
-  });
-}
-
 app.post("/registerAF", (req, res) => {
   // 회원가입 post
   i++;
   var sql = "INSERT INTO PERSON VALUES(?, ?, ?, ?)";
-  var hashedpassword = '"' + hashPassword(req.body.pw) + '"';
-  var params = [req.body.id, hashedpassword, req.body.name, i];
+  console.log("here : " + hpass);
   if (req.body.pw === req.body.rpw) {
     // 비밀번호 확인이 제대로 되었는지
+    hashPassword(req.body.pw);
+    console.log("here : " + hpass);
+    var params = [req.body.id, hpass, req.body.name, i];
+    console.log(params);
     conn.query(sql, params, function (err) {
       if (err) {
         // 제대로 DB로 갔는지 확인
@@ -92,13 +75,13 @@ app.post("/loginAF", (req, res) => {
     var result;
     var result_pw = { pw: "" };
 
-    conn.query(sql_pw, function (err, results) {
+    conn.query(sql_id, function (err, results) {
       result = results[0];
 
       if (result != undefined) {
         // 2)아이디가 DB 상에 존재를 하는가
         result_pw = result.pw;
-
+        console.log(checkUser(c_pw, result_pw));
         if (checkUser(c_pw, result_pw)) {
           // 비밀번호 확인 3)입력한 아이디가 DB 상의 비밀번호와 일치하는가
           return res.send(
@@ -131,11 +114,37 @@ app.post("/matchAF", (req, res) => {
   res.redirect("/match");
 });
 
+function hashPassword(password) {
+  bcrypt.hash(password, saltRounds, function (err, hash) {
+    try {
+      hpass = hash;
+      console.log("pass: " + hpass);
+      console.log("passlength : " + hpass.length);
+      return hpass;
+    } catch (err) {
+      console.log(err);
+    }
+  });
+}
+function checkUser(bp, hpassword) {
+  bcrypt.compare(bp, hpassword, function (err, result) {
+    try {
+      if (result) {
+        return result;
+      } else {
+        return result;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  });
+}
+
 app.listen(3000, () => {
   console.log("서버 띄우기");
 });
 
 // person 생성 코드
-// create table person(id varchar(30) primary key, pw varchar(50), name varchar(30), num int);
+// create table person(id varchar(30) primary key, pw varchar(100), name varchar(30), num int);
 // var sql_pw = "SELECT pw FROM PERSON WHERE ID = " + '"' + c_id + '"'; // 아이디가 존재하는지 확인 후 그에 맞는 password 가져옴
 // var sql_name = "SELECT name FROM PERSON WHERE ID = " + '"' + c_id + '"';
