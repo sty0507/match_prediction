@@ -5,39 +5,27 @@ const bcrypt = require("bcrypt");
 
 const saltRounds = 10; // 몇번 해싱을 할 것인지
 var afterPassword = ""; // after
-var m = "";
 
-app.get("/", function (req, res) {
+app.get("/", async function (req, res) {
   var beforePassword = "12345";
-  hpassword(beforePassword);
-  for (var i = 0; i < 10; i++) {
-    console.log(i);
-  }
-
-  console.log("m : " + m);
+  var testpass = "1234";
+  var a = await hpassword(beforePassword);
+  var ch = await checkUser(testpass, a);
+  console.log("m : " + a);
+  console.log("ch : " + ch);
 });
-function checkUser(bp) {
-  bcrypt.compare(bp, m, function (err, result) {
-    try {
-      console.log("true");
-    } catch (err) {
-      console.log("false");
-    }
-  });
+async function checkUser(bp, m) {
+  var b = bcrypt.compare(bp, m);
+  console.log(b)
+  return b;
 }
-function hpassword(bp) {
-  bcrypt.hash(bp, saltRounds, function (err, hash) {
-    try {
-      m = hash;
-      console.log("after : " + m);
-    } catch (err) {
-      console.log(err); // 예외처리
-    }
-  });
+async function hpassword(bp) {
+  const hashpass = await bcrypt.hash(bp, saltRounds);
+  return hashpass;
 }
 
 app.get("/home", function (req, res) {
-  console.log("after : " + m);
+  console.log("after : " + a);
 });
 
 app.listen(8080, () => {

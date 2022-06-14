@@ -5,7 +5,6 @@ const bcrypt = require("bcrypt");
 var db_config = require(__dirname + "/config/database.js");
 var conn = db_config.init();
 let i = 0;
-let hpass = "";
 const saltRounds = 10;
 
 db_config.connect(conn);
@@ -33,17 +32,14 @@ app.get("/login", (req, res) => {
   res.render("index.html");
 });
 
-app.post("/registerAF", (req, res) => {
+app.post("/registerAF", async (req, res) => {
   // 회원가입 post
   i++;
   var sql = "INSERT INTO PERSON VALUES(?, ?, ?, ?)";
-  console.log("here : " + hpass);
   if (req.body.pw === req.body.rpw) {
     // 비밀번호 확인이 제대로 되었는지
-    hashPassword(req.body.pw);
-    console.log("here : " + hpass);
+    var hpass = await hashPassword(req.body.pw);
     var params = [req.body.id, hpass, req.body.name, i];
-    console.log(params);
     conn.query(sql, params, function (err) {
       if (err) {
         // 제대로 DB로 갔는지 확인
@@ -71,18 +67,15 @@ app.post("/loginAF", (req, res) => {
       "<script>alert('입력해주세요.'); window.location.replace('/login');</script>"
     ); // 1)입력을 했는가
   } else {
-    var sql_id = "SELECT id FROM PERSON";
+    var sql_pw = "SELECT pw FROM PERSON WHERE ID = " + '"' + c_id + '"';
     var result;
     var result_pw = { pw: "" };
-
-    conn.query(sql_id, function (err, results) {
+    conn.query(sql_pw, async function (err, results) {
       result = results[0];
-
       if (result != undefined) {
         // 2)아이디가 DB 상에 존재를 하는가
         result_pw = result.pw;
-        console.log(checkUser(c_pw, result_pw));
-        if (checkUser(c_pw, result_pw)) {
+        if (await checkUser(c_pw, result_pw)) {
           // 비밀번호 확인 3)입력한 아이디가 DB 상의 비밀번호와 일치하는가
           return res.send(
             "<script>alert('성공적으로 로그인이 되었습니다.'); window.location.replace('/home');</script>"
@@ -114,30 +107,13 @@ app.post("/matchAF", (req, res) => {
   res.redirect("/match");
 });
 
-function hashPassword(password) {
-  bcrypt.hash(password, saltRounds, function (err, hash) {
-    try {
-      hpass = hash;
-      console.log("pass: " + hpass);
-      console.log("passlength : " + hpass.length);
-      return hpass;
-    } catch (err) {
-      console.log(err);
-    }
-  });
+async function hashPassword(password) {
+  const hashpass = await bcrypt.hash(password, saltRounds);
+  return hashpass;
 }
-function checkUser(bp, hpassword) {
-  bcrypt.compare(bp, hpassword, function (err, result) {
-    try {
-      if (result) {
-        return result;
-      } else {
-        return result;
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  });
+async function checkUser(bp, hpassword) {
+  const re = bcrypt.compareSync(bp, hpassword);
+  return re;
 }
 
 app.listen(3000, () => {
