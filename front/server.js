@@ -17,12 +17,11 @@ app.get("/home", function (req, res) {
   } else return res.render("a", { id: "누구세요" });
 });
 app.get("/getcookie", function (req, res) {
-  res.send(req.cookies);
+  res.render("a", { id: " " });
 });
-app.get("/setcookie", function (req, res) {
-  res.cookie("string", "cookie");
-  res.cookie("json", { id: "tae", pw: "1234" });
-  res.redirect("/getcookie");
+app.post("/setcookie", function (req, res) {
+  in_id;
+  res.redirect("/home");
 });
 app.get("/testcookie", function (req, res) {
   console.log(req.cookies.json.id);
@@ -31,6 +30,13 @@ app.get("/testcookie", function (req, res) {
 function check(wid, usr) {
   if (wid == usr) return true;
   else return false;
+}
+function in_id() {
+  let id = document.getElementById("id");
+  let name = document.getElementById("name");
+  res.cookie("string", "cookie");
+  res.cookie("json", { id: id, name: name });
+  return;
 }
 app.listen(8080, () => {
   console.log("서버 띄우기");
