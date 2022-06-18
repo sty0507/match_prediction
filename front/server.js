@@ -1,5 +1,6 @@
 const express = require("express");
 var cookieParser = require("cookie-parser");
+const { localsName } = require("ejs");
 const app = express();
 app.use(cookieParser());
 app.set("views", "./front/views");
@@ -19,9 +20,10 @@ app.get("/home", function (req, res) {
 app.get("/getcookie", function (req, res) {
   res.render("a", { id: " " });
 });
-app.post("/setcookie", function (req, res) {
-  in_id;
-  res.redirect("/home");
+app.post("/setcookie", (req, res) => {
+  console.log(req.body.p_id);
+  in_id(req);
+  res.redirect("/getcookie");
 });
 app.get("/testcookie", function (req, res) {
   console.log(req.cookies.json.id);
@@ -31,12 +33,14 @@ function check(wid, usr) {
   if (wid == usr) return true;
   else return false;
 }
-function in_id() {
-  let id = document.getElementById("id");
-  let name = document.getElementById("name");
+function in_id(req) {
+  console.log(req.body.p_id);
+  var id = req.body.p_id;
+  var name = req.body.p_name;
+  console.log(id);
+  console.log(name);
   res.cookie("string", "cookie");
   res.cookie("json", { id: id, name: name });
-  return;
 }
 app.listen(8080, () => {
   console.log("서버 띄우기");
