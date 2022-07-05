@@ -4,6 +4,9 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 var db_config = require(__dirname + "/config/database.js");
 var conn = db_config.init();
+var http = require("http");
+var cookie = require("cookie");
+
 let i = 0;
 const saltRounds = 10;
 
@@ -31,7 +34,6 @@ app.get("/register", (req, res) => {
 app.get("/login", (req, res) => {
   res.render("index.html");
 });
-
 app.post("/registerAF", async (req, res) => {
   // 회원가입 post
   i++;
@@ -106,15 +108,6 @@ app.post("/matchAF", (req, res) => {
 
   res.redirect("/match");
 });
-
-async function hashPassword(password) {
-  const hashpass = await bcrypt.hash(password, saltRounds);
-  return hashpass;
-}
-async function checkUser(bp, hpassword) {
-  const re = bcrypt.compareSync(bp, hpassword);
-  return re;
-}
 
 app.listen(3000, () => {
   console.log("서버 띄우기");

@@ -7,14 +7,10 @@
     <title>Document</title>
   </head>
   <body>
-    <form action="/setcookie" method="post">
-      <input type="text" placeholder="id" id="id" />
-      <input type="text" placeholder="name" id="name" />
+    <form action="./login" method="post">
+      <input type="text" placeholder="id" id="id" name="p_id" />
+      <input type="text" placeholder="pw" id="pw" name="p_pw" />
       <input type="submit" value="제출" />
     </form>
-
-    <script>
-      alert("<%= id %>");
-    </script>
   </body>
 </html>
