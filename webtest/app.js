@@ -4,20 +4,20 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 var db_config = require(__dirname + "/config/database.js");
 var conn = db_config.init();
-var http = require("http");
 var cookie = require("cookie");
 
+// 함수에서 전역으로 사용하는 변수들
 let i = 0;
 const saltRounds = 10;
-
+//DB 연동
 db_config.connect(conn);
+
+module.exports = app;
 
 app.set("views", "./webtest/views");
 app.set("view engine", "ejs");
 app.engine("html", require("ejs").renderFile);
 app.use(express.urlencoded({ extended: false }));
-
-module.exports = app;
 
 app.get("/home", (req, res) => {
   res.render("home.html");
@@ -34,6 +34,7 @@ app.get("/register", (req, res) => {
 app.get("/login", (req, res) => {
   res.render("index.html");
 });
+// ============================== 회원가입 ================================
 app.post("/registerAF", async (req, res) => {
   // 회원가입 post
   i++;
@@ -58,11 +59,13 @@ app.post("/registerAF", async (req, res) => {
     );
   }
 });
+//==============================================================
 
+//============================== 로그인 ================================
 app.post("/loginAF", (req, res) => {
   // 로그인 post
-  let c_id = req.body.id;
-  let c_pw = req.body.pw;
+  let c_id = req.body.id; // 입력 받은 id
+  let c_pw = req.body.pw; // 입력 받은 pw
 
   if (c_pw == "" || c_id == "") {
     res.send(
@@ -79,6 +82,7 @@ app.post("/loginAF", (req, res) => {
         result_pw = result.pw;
         if (await checkUser(c_pw, result_pw)) {
           // 비밀번호 확인 3)입력한 아이디가 DB 상의 비밀번호와 일치하는가
+          setCookie(res, c_id, c_pw);
           return res.send(
             "<script>alert('성공적으로 로그인이 되었습니다.'); window.location.replace('/home');</script>"
           );
@@ -95,7 +99,9 @@ app.post("/loginAF", (req, res) => {
     });
   }
 });
+//========================================================================
 
+//=================================== 매치 ===============================
 app.post("/matchAF", (req, res) => {
   // 매치 post
   var home = req.body.wh;
@@ -108,6 +114,27 @@ app.post("/matchAF", (req, res) => {
 
   res.redirect("/match");
 });
+//======================================================================
+
+//================================== 패스워드 암호화 ====================
+async function hashPassword(password) {
+  const hashpass = await bcrypt.hash(password, saltRounds);
+  return hashpass;
+}
+//=======================================================================
+
+//========================================= 유저 확인 ===================
+async function checkUser(bp, hpassword) {
+  const re = bcrypt.compareSync(bp, hpassword);
+  return re;
+}
+// =======================================================================
+
+// ================================= 로그인 했다는 쿠키 입력 ======================================
+function setCookie(res, id, pw) {
+  res.cookie("id", id);
+  res.cookie("pw", pw);
+}
 
 app.listen(3000, () => {
   console.log("서버 띄우기");
