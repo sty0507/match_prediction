@@ -167,3 +167,5 @@ app.listen(3000, () => {
 // create table person(id varchar(30) primary key, pw varchar(100), name varchar(30), num int);
 // var sql_pw = "SELECT pw FROM PERSON WHERE ID = " + '"' + c_id + '"'; // 아이디가 존재하는지 확인 후 그에 맞는 password 가져옴
 // var sql_name = "SELECT name FROM PERSON WHERE ID = " + '"' + c_id + '"';
+// wallet 생성 코드
+// create table wallet (id varchar(30) , cost int, num int, foreign key (`id`) references `person` (`id`));
