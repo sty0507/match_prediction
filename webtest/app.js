@@ -5,6 +5,8 @@ const bcrypt = require("bcrypt");
 var db_config = require(__dirname + "/config/database.js");
 var conn = db_config.init();
 var cookie = require("cookie");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 // 함수에서 전역으로 사용하는 변수들
 let i = 0;
@@ -16,23 +18,30 @@ module.exports = app;
 
 app.set("views", "./webtest/views");
 app.set("view engine", "ejs");
-app.engine("html", require("ejs").renderFile);
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser("fhr#!md4l%sdk@3d%l$e@l"));
 
 app.get("/home", (req, res) => {
-  res.render("home.html");
+  let decoded = jwt.decode(req.cookies.token, "secretToken");
+  let sql_name = "SELECT name FROM person WHERE id = " + "'" + decoded + "'";
+  if (decoded != undefined) {
+    conn.query(sql_name, function (err, results) {
+      let name = results[0].name;
+      return res.render("home.ejs", { usr: 1, name: name });
+    });
+  } else return res.render("home.ejs", { usr: 0 });
 });
 
 app.get("/match", (req, res) => {
-  res.render("match_prediction.html");
+  res.render("match_prediction.ejs");
 });
 
 app.get("/register", (req, res) => {
-  res.render("register.html");
+  res.render("register.ejs");
 });
 
 app.get("/login", (req, res) => {
-  res.render("index.html");
+  res.render("index.ejs");
 });
 // ============================== 회원가입 ================================
 app.post("/registerAF", async (req, res) => {
@@ -82,10 +91,8 @@ app.post("/loginAF", (req, res) => {
         result_pw = result.pw;
         if (await checkUser(c_pw, result_pw)) {
           // 비밀번호 확인 3)입력한 아이디가 DB 상의 비밀번호와 일치하는가
-          setCookie(res, c_id, c_pw);
-          return res.send(
-            "<script>alert('성공적으로 로그인이 되었습니다.'); window.location.replace('/home');</script>"
-          );
+          setCookie(res, req, c_id);
+          return res.redirect("/home");
         } else {
           return res.send(
             "<script>alert('비밀번호가 일치하지 않습니다.'); window.location.replace('/login');</script>"
@@ -116,6 +123,12 @@ app.post("/matchAF", (req, res) => {
 });
 //======================================================================
 
+//=============================== 로그아웃 =============================
+app.post("/logoutAF", (req, res) => {
+  clearCookies(res);
+  res.redirect("/home");
+});
+//======================================================================
 //================================== 패스워드 암호화 ====================
 async function hashPassword(password) {
   const hashpass = await bcrypt.hash(password, saltRounds);
@@ -130,11 +143,21 @@ async function checkUser(bp, hpassword) {
 }
 // =======================================================================
 
-// ================================= 로그인 했다는 쿠키 입력 ======================================
-function setCookie(res, id, pw) {
-  res.cookie("id", id);
-  res.cookie("pw", pw);
+// ================================= 로그인 했다는 쿠키 입력 ==============
+function setCookie(res, req, id) {
+  var expiryDate = new Date(Date.now() + 60 * 60 * 1000 * 24 * 7);
+  var token = jwt.sign(id.toString(), "secretToken");
+  //var decoded = jwt.decode(token, "secretToken");
+  // res.cookie("id", id, { expires: expiryDate, httpOnly: true, signed: true });
+  res.cookie("token", token, { expires: expiryDate, httpOnly: true });
 }
+// ========================================================================
+
+// ====================================로그아웃 쿠키========================
+function clearCookies(res) {
+  res.clearCookie("token");
+}
+// ========================================================================
 
 app.listen(3000, () => {
   console.log("서버 띄우기");

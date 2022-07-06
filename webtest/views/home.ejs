@@ -7,11 +7,17 @@
     <title>Document</title>
   </head>
   <body>
+    <% if(usr) {%>
+    <h1><%= name %>님 반갑습니다</h1>
+    <% }%>
     <input
       type="button"
       onclick="location.href='../register'"
       value="register"
     />
     <input type="button" onclick="location.href ='../login'" value="login" />
+    <form action="./logoutAF" method="post">
+      <input type="submit" value="logout" />
+    </form>
   </body>
 </html>

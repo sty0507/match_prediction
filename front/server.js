@@ -32,6 +32,8 @@ app.get("/update", function (req, res) {
 // 쿠키 삭제
 app.get("/logout", function (req, res) {
   res.clearCookie("FirstName");
+  res.clearCookie("id")
+  res.clearCookie("pw")
   res.redirect("/state");
 });
 
