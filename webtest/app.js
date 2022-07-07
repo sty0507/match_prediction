@@ -11,6 +11,7 @@ const jwt = require("jsonwebtoken");
 // 함수에서 전역으로 사용하는 변수들
 let i = 0;
 const saltRounds = 10;
+const Basiccost = 5000;
 //DB 연동
 db_config.connect(conn);
 
@@ -21,13 +22,27 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser("fhr#!md4l%sdk@3d%l$e@l"));
 
-app.get("/home", (req, res) => {
+// function PersonName(sql_name) {
+//   conn.query(sql_name, function (err, results) {
+//     var name = results[0].name;
+//     console.log(name);
+//     return name;
+//   });
+// }
+// function PersonCost(sql_cost) {
+//   conn.query(sql_cost, function (err, results) {
+//     var cost = results[0].cost;
+//     return cost;
+//   });
+// }
+app.get("/home", async (req, res) => {
   let decoded = jwt.decode(req.cookies.token, "secretToken");
-  let sql_name = "SELECT name FROM person WHERE id = " + "'" + decoded + "'";
+  let sql = "SELECT name, cost FROM person WHERE id = " + "'" + decoded + "'";
   if (decoded != undefined) {
-    conn.query(sql_name, function (err, results) {
-      let name = results[0].name;
-      return res.render("home.ejs", { usr: 1, name: name });
+    conn.query(sql, function (err, results) {
+      var name = results[0].name;
+      var cost = results[0].cost;
+      return res.render("home.ejs", { usr: 1, name: name, cost: cost });
     });
   } else return res.render("home.ejs", { usr: 0 });
 });
@@ -47,11 +62,11 @@ app.get("/login", (req, res) => {
 app.post("/registerAF", async (req, res) => {
   // 회원가입 post
   i++;
-  var sql = "INSERT INTO PERSON VALUES(?, ?, ?, ?)";
+  var sql = "INSERT INTO PERSON VALUES(?, ?, ?, ?, ?)";
   if (req.body.pw === req.body.rpw) {
     // 비밀번호 확인이 제대로 되었는지
     var hpass = await hashPassword(req.body.pw);
-    var params = [req.body.id, hpass, req.body.name, i];
+    var params = [req.body.id, hpass, req.body.name, i, Basiccost];
     conn.query(sql, params, function (err) {
       if (err) {
         // 제대로 DB로 갔는지 확인
@@ -164,8 +179,6 @@ app.listen(3000, () => {
 });
 
 // person 생성 코드
-// create table person(id varchar(30) primary key, pw varchar(100), name varchar(30), num int);
+// create table person(id varchar(30) primary key, pw varchar(100), name varchar(30), num int,cost int);
 // var sql_pw = "SELECT pw FROM PERSON WHERE ID = " + '"' + c_id + '"'; // 아이디가 존재하는지 확인 후 그에 맞는 password 가져옴
 // var sql_name = "SELECT name FROM PERSON WHERE ID = " + '"' + c_id + '"';
-// wallet 생성 코드
-// create table wallet (id varchar(30) , cost int, num int, foreign key (`id`) references `person` (`id`));

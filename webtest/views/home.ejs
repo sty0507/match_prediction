@@ -7,9 +7,13 @@
     <title>Document</title>
   </head>
   <body>
-    <% if(usr) {%>
-    <h1><%= name %>님 반갑습니다</h1>
-    <% }%>
+    <header>
+      <% if(usr) {%>
+      <p><%= name %>님 반갑습니다</p>
+      <p><%= cost %>원</p>
+      <% }%>
+    </header>
+
     <input
       type="button"
       onclick="location.href='../register'"
