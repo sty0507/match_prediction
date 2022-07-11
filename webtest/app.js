@@ -48,7 +48,13 @@ app.get("/home", async (req, res) => {
 });
 
 app.get("/match", (req, res) => {
-  res.render("match_prediction.ejs");
+  let sql = "SELECT hometeam, awayteam FROM schedule WHERE match_status = 'SCHEDULED'"
+  conn.query(sql, function(err, results){
+    let home = results[0].hometeam;
+    let away = results[0].awayteam;
+    return res.render("match_prediction.ejs", {homeTeam : home, awayTeam : away})
+  })
+
 });
 
 app.get("/register", (req, res) => {

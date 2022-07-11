@@ -7,17 +7,32 @@
     <title>Match</title>
   </head>
   <body>
-    <p></p>
     <!--홈팀 -->
-    <p></p>
+    <p><%= homeTeam %> VS <%= awayTeam %></p>
     <!-- 원정팀 -->
     <!-- DB에서 값 가져옴-->
     <form action="./matchAF" method="post">
-      <input type="submit" name="wh" value="WIN(home)" />
+      <input type="submit" name="wh" value="WIN(home)" onclick="home()" />
       <!-- 홈팀 승리 -->
-      <input type="submit" name="d" value="Draw" />
+      <input type="submit" name="d" value="Draw" onclick="draw()" />
       <!-- 무승부 -->
-      <input type="submit" name="wa" value="WIN(AWAY)" /><!-- 원정팀 승리 -->
+      <input
+        type="submit"
+        name="wa"
+        value="WIN(AWAY)"
+        onclick="away()"
+      /><!-- 원정팀 승리 -->
     </form>
+    <script>
+      function home() {
+        alert("homeTeam will win");
+      }
+      function away() {
+        alert("awayTeam will win");
+      }
+      function draw() {
+        alert("they will draw");
+      }
+    </script>
   </body>
 </html>
